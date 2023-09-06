@@ -1,6 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Movies.Client.Data;
+﻿// Ignore Spelling: Api
+
+using Microsoft.AspNetCore.Mvc;
+using Movies.Client.ApiServices;
 using Movies.Client.Models;
 
 namespace Movies.Client.Controllers;
@@ -8,33 +9,25 @@ namespace Movies.Client.Controllers;
 public class MoviesController : Controller
 {
     #region Fields :
-    private readonly MoviesClientContext _context;
+    private readonly IMovieApiService _movieApiService;
     #endregion
 
     #region CTORS :
-    public MoviesController(MoviesClientContext context)
+    public MoviesController(IMovieApiService movieApiService)
     {
-        _context = context;
+        _movieApiService = movieApiService;
     }
     #endregion
 
     #region Actions :
-    // GET: Movies
     public async Task<IActionResult> Index()
     {
-        return View(await _context.Movie.ToListAsync());
+        return View(await _movieApiService.GetMoviesAsync());
     }
 
-    // GET: Movies/Details/5
-    public async Task<IActionResult> Details(int? id)
+    public async Task<IActionResult> Details(int id)
     {
-        if (id == null)
-        {
-            return NotFound();
-        }
-
-        var movie = await _context.Movie
-            .FirstOrDefaultAsync(m => m.Id == id);
+        var movie = await _movieApiService.GetMovieAsync(id);
         if (movie == null)
         {
             return NotFound();
@@ -43,37 +36,27 @@ public class MoviesController : Controller
         return View(movie);
     }
 
-    // GET: Movies/Create
     public IActionResult Create()
     {
         return View();
     }
 
-    // POST: Movies/Create
-    // To protect from overposting attacks, enable the specific properties you want to bind to.
-    // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create([Bind("Id,Title,Genre,ReleaseDate,Owner,Rating,ImageUrl")] Movie movie)
     {
         if (ModelState.IsValid)
         {
-            _context.Add(movie);
-            await _context.SaveChangesAsync();
+            await _movieApiService.CreateMovieAsync(movie);
             return RedirectToAction(nameof(Index));
         }
         return View(movie);
     }
 
-    // GET: Movies/Edit/5
-    public async Task<IActionResult> Edit(int? id)
+    public async Task<IActionResult> Edit(int id)
     {
-        if (id == null)
-        {
-            return NotFound();
-        }
 
-        var movie = await _context.Movie.FindAsync(id);
+        var movie = await _movieApiService.GetMovieAsync(id);
         if (movie == null)
         {
             return NotFound();
@@ -95,37 +78,16 @@ public class MoviesController : Controller
 
         if (ModelState.IsValid)
         {
-            try
-            {
-                _context.Update(movie);
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!MovieExists(movie.Id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+            await _movieApiService.UpdateMovieAsync(movie);
             return RedirectToAction(nameof(Index));
         }
         return View(movie);
     }
 
     // GET: Movies/Delete/5
-    public async Task<IActionResult> Delete(int? id)
+    public async Task<IActionResult> Delete(int id)
     {
-        if (id == null)
-        {
-            return NotFound();
-        }
-
-        var movie = await _context.Movie
-            .FirstOrDefaultAsync(m => m.Id == id);
+        var movie = await _movieApiService.GetMovieAsync(id);
         if (movie == null)
         {
             return NotFound();
@@ -139,21 +101,9 @@ public class MoviesController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteConfirmed(int id)
     {
-        var movie = await _context.Movie.FindAsync(id);
-        if (movie != null)
-        {
-            _context.Movie.Remove(movie);
-        }
-
-        await _context.SaveChangesAsync();
+        await _movieApiService.DeleteMovieAsync(id);
         return RedirectToAction(nameof(Index));
     }
     #endregion
 
-    #region Helpers :
-    private bool MovieExists(int id)
-    {
-        return _context.Movie.Any(e => e.Id == id);
-    }
-    #endregion
 }
