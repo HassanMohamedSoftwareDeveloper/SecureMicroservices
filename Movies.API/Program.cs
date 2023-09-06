@@ -1,8 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using Movies.API.Data;
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddDbContext<MoviesAPIContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("MoviesAPIContext") ?? throw new InvalidOperationException("Connection string 'MoviesAPIContext' not found.")));
+builder.Services
+    .AddDbContext<MoviesAPIContext>(
+    options => options.UseInMemoryDatabase("MoviesDB"));
 
 
 builder.Services.AddControllers();
@@ -22,5 +23,5 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
-
+app.SeedAsync();
 app.Run();

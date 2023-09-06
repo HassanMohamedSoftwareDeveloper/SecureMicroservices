@@ -7,4 +7,6 @@ public class Movie
     public string Genre { get; set; } = string.Empty;
     public DateTime ReleaseDate { get; set; }
     public string Owner { get; set; } = string.Empty;
+    public string Rating { get; set; } = string.Empty;
+    public string ImageUrl { get; set; } = string.Empty;
 }
