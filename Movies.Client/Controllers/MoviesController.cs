@@ -1,11 +1,13 @@
 ﻿// Ignore Spelling: Api
 
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Movies.Client.ApiServices;
 using Movies.Client.Models;
 
 namespace Movies.Client.Controllers;
 
+[Authorize]
 public class MoviesController : Controller
 {
     #region Fields :
