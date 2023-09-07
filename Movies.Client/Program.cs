@@ -1,5 +1,4 @@
-﻿using IdentityModel.Client;
-using Microsoft.AspNetCore.Authentication.Cookies;
+﻿using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.Net.Http.Headers;
 using Movies.Client.ApiServices;
@@ -46,13 +45,15 @@ builder.Services.AddHttpClient("IDPClient", client =>
     client.DefaultRequestHeaders.Add(HeaderNames.Accept, "application/json");
 });
 
-builder.Services.AddSingleton(new ClientCredentialsTokenRequest
-{
-    Address = "/connect/token",
-    ClientId = "movieClient",
-    ClientSecret = "secret",
-    Scope = "movieAPI"
-});
+//builder.Services.AddSingleton(new ClientCredentialsTokenRequest
+//{
+//    Address = "/connect/token",
+//    ClientId = "movieClient",
+//    ClientSecret = "secret",
+//    Scope = "movieAPI"
+//});
+
+builder.Services.AddHttpContextAccessor();
 
 var app = builder.Build();
 
