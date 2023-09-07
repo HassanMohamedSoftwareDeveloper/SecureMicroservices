@@ -1,99 +1,46 @@
 ﻿// Ignore Spelling: Api
+using IdentityModel.Client;
 using Movies.Client.Models;
+using Newtonsoft.Json;
 
 namespace Movies.Client.ApiServices;
 
 public class MovieApiService : IMovieApiService
 {
     #region Methods :
-    public Task<IEnumerable<Movie>> GetMoviesAsync()
+    public async Task<IEnumerable<Movie>> GetMoviesAsync()
     {
-        IEnumerable<Movie> movies = new List<Movie>
-                {
-                    new Movie
-                    {
-                        Id = 1,
-                        Genre = "Drama",
-                        Title = "The Shawshank Redemption",
-                        Rating = "9.3",
-                        ImageUrl = "images/src",
-                        ReleaseDate = new DateTime(1994, 5, 5),
-                        Owner = "alice"
-                    },
-                    new Movie
-                    {
-                        Id = 2,
-                        Genre = "Crime",
-                        Title = "The Godfather",
-                        Rating = "9.2",
-                        ImageUrl = "images/src",
-                        ReleaseDate = new DateTime(1972, 5, 5),
-                        Owner = "alice"
-                    },
-                    new Movie
-                    {
-                        Id = 3,
-                        Genre = "Action",
-                        Title = "The Dark Knight",
-                        Rating = "9.1",
-                        ImageUrl = "images/src",
-                        ReleaseDate = new DateTime(2008, 5, 5),
-                        Owner = "bob"
-                    },
-                    new Movie
-                    {
-                        Id = 4,
-                        Genre = "Crime",
-                        Title = "12 Angry Men",
-                        Rating = "8.9",
-                        ImageUrl = "images/src",
-                        ReleaseDate = new DateTime(1957, 5, 5),
-                        Owner = "bob"
-                    },
-                    new Movie
-                    {
-                        Id = 5,
-                        Genre = "Biography",
-                        Title = "Schindler's List",
-                        Rating = "8.9",
-                        ImageUrl = "images/src",
-                        ReleaseDate = new DateTime(1993, 5, 5),
-                        Owner = "alice"
-                    },
-                    new Movie
-                    {
-                        Id = 6,
-                        Genre = "Drama",
-                        Title = "Pulp Fiction",
-                        Rating = "8.9",
-                        ImageUrl = "images/src",
-                        ReleaseDate = new DateTime(1994, 5, 5),
-                        Owner = "alice"
-                    },
-                    new Movie
-                    {
-                        Id = 7,
-                        Genre = "Drama",
-                        Title = "Fight Club",
-                        Rating = "8.8",
-                        ImageUrl = "images/src",
-                        ReleaseDate = new DateTime(1999, 5, 5),
-                        Owner = "bob"
-                    },
-                    new Movie
-                    {
-                        Id = 8,
-                        Genre = "Romance",
-                        Title = "Forrest Gump",
-                        Rating = "8.8",
-                        ImageUrl = "images/src",
-                        ReleaseDate = new DateTime(1994, 5, 5),
-                        Owner = "bob"
-                    }
-                };
+        // 1- Get Token from IS
+        // 2- Send request to protected API
+        // 3- De-serialize Object 
 
-        return Task.FromResult(movies);
+        var apiClientCredentials = new ClientCredentialsTokenRequest
+        {
+            Address = "https://localhost:7077/connect/token",
+            ClientId = "movieClient",
+            ClientSecret = "secret",
+            Scope = "movieAPI"
+        };
 
+        var client = new HttpClient();
+
+        var disco = await client.GetDiscoveryDocumentAsync("https://localhost:7077/");
+        if (disco.IsError) return Enumerable.Empty<Movie>();
+
+        var tokenResponse = await client.RequestClientCredentialsTokenAsync(apiClientCredentials);
+        if (tokenResponse.IsError) return Enumerable.Empty<Movie>();
+
+        var apiClient = new HttpClient();
+
+        apiClient.SetBearerToken(tokenResponse.AccessToken);
+
+        var response = await apiClient.GetAsync("https://localhost:7189/api/movies");
+        response.EnsureSuccessStatusCode();
+
+        var content = await response.Content.ReadAsStringAsync();
+        List<Movie> movies = JsonConvert.DeserializeObject<List<Movie>>(content);
+
+        return movies;
     }
     public Task<Movie> GetMovieAsync(int id)
     {
