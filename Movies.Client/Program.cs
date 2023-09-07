@@ -1,6 +1,9 @@
-﻿using Microsoft.AspNetCore.Authentication.Cookies;
+﻿using IdentityModel.Client;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
+using Microsoft.Net.Http.Headers;
 using Movies.Client.ApiServices;
+using Movies.Client.HttpHandlers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,6 +27,30 @@ builder.Services.AddAuthentication(options =>
         options.SaveTokens = true;
         options.GetClaimsFromUserInfoEndpoint = true;
     });
+
+builder.Services.AddTransient<AuthenticationDelegationHandler>();
+builder.Services.AddHttpClient("MovieAPIClient", client =>
+{
+    client.BaseAddress = new Uri("https://localhost:7189/");
+    client.DefaultRequestHeaders.Clear();
+    client.DefaultRequestHeaders.Add(HeaderNames.Accept, "application/json");
+})
+    .AddHttpMessageHandler<AuthenticationDelegationHandler>();
+
+builder.Services.AddHttpClient("IDPClient", client =>
+{
+    client.BaseAddress = new Uri("https://localhost:7077/");
+    client.DefaultRequestHeaders.Clear();
+    client.DefaultRequestHeaders.Add(HeaderNames.Accept, "application/json");
+});
+
+builder.Services.AddSingleton(new ClientCredentialsTokenRequest
+{
+    Address = "/connect/token",
+    ClientId = "movieClient",
+    ClientSecret = "secret",
+    Scope = "movieAPI"
+});
 
 var app = builder.Build();
 
