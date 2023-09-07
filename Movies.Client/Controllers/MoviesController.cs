@@ -1,9 +1,12 @@
 ﻿// Ignore Spelling: Api
 
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Movies.Client.ApiServices;
 using Movies.Client.Models;
+using System.Diagnostics;
 
 namespace Movies.Client.Controllers;
 
@@ -24,6 +27,7 @@ public class MoviesController : Controller
     #region Actions :
     public async Task<IActionResult> Index()
     {
+        await LogTokenAndClaims();
         return View(await _movieApiService.GetMoviesAsync());
     }
 
@@ -108,4 +112,15 @@ public class MoviesController : Controller
     }
     #endregion
 
+    #region Helpers :
+    private async Task LogTokenAndClaims()
+    {
+        var identityToken = await HttpContext.GetTokenAsync(OpenIdConnectParameterNames.IdToken);
+        Debug.WriteLine($"Identity token : {identityToken}");
+        foreach (var claim in User.Claims)
+        {
+            Debug.WriteLine($"Claim Type : {claim.Type} - Claim Value : {claim.Value}");
+        }
+    }
+    #endregion
 }
