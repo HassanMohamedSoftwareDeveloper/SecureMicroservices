@@ -27,7 +27,8 @@ public static class Config
          {
             ClientId="movie_mvc_client",
             ClientName="Movies MVC Web App",
-            AllowedGrantTypes=GrantTypes.Code,
+            AllowedGrantTypes=GrantTypes.Hybrid,
+            RequirePkce=false,
             AllowRememberConsent=false,
             RedirectUris=new List<string>()
             {
@@ -45,6 +46,7 @@ public static class Config
             {
                 IdentityServerConstants.StandardScopes.OpenId,
                 IdentityServerConstants.StandardScopes.Profile,
+                "movieAPI",
             }
         },
     };
