@@ -11,5 +11,5 @@ public interface IMovieApiService
     Task<Movie> CreateMovieAsync(Movie movie);
     Task<Movie> UpdateMovieAsync(Movie movie);
     Task DeleteMovieAsync(int id);
-
+    Task<UserInfoViewModel> GetUserInfoAsync();
 }

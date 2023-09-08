@@ -118,6 +118,12 @@ public class MoviesController : Controller
         await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
         await HttpContext.SignOutAsync(OpenIdConnectDefaults.AuthenticationScheme);
     }
+    [Authorize(Roles = "admin")]
+    public async Task<IActionResult> OnlyAdmin()
+    {
+        var userInfo = await _movieApiService.GetUserInfoAsync();
+        return View(userInfo);
+    }
     #endregion
 
     #region Helpers :

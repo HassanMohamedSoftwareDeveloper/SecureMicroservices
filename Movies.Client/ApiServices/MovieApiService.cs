@@ -1,4 +1,7 @@
 ﻿// Ignore Spelling: Api
+using IdentityModel.Client;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Movies.Client.Models;
 using Newtonsoft.Json;
 using System.Text;
@@ -9,12 +12,14 @@ public class MovieApiService : IMovieApiService
 {
     #region Fields :
     private readonly IHttpClientFactory _httpClientFactory;
+    private readonly IHttpContextAccessor _httpContextAccessor;
     #endregion
 
     #region CTORS :
-    public MovieApiService(IHttpClientFactory httpClientFactory)
+    public MovieApiService(IHttpClientFactory httpClientFactory, IHttpContextAccessor httpContextAccessor)
     {
-        _httpClientFactory = httpClientFactory;
+        _httpClientFactory = httpClientFactory ?? throw new ArgumentNullException(nameof(httpClientFactory));
+        _httpContextAccessor = httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor));
     }
     #endregion
 
@@ -97,6 +102,36 @@ public class MovieApiService : IMovieApiService
              .ConfigureAwait(false);
 
         response.EnsureSuccessStatusCode();
+    }
+
+    public async Task<UserInfoViewModel> GetUserInfoAsync()
+    {
+        var idpClient = _httpClientFactory.CreateClient("IDPClient");
+        var metaDataResponse = await idpClient.GetDiscoveryDocumentAsync();
+
+        if (metaDataResponse.IsError)
+            throw new HttpRequestException("Something went wrong while requesting the access token");
+
+
+        var token = await _httpContextAccessor.HttpContext.GetTokenAsync(OpenIdConnectParameterNames.AccessToken);
+        if (string.IsNullOrWhiteSpace(token))
+            throw new ArgumentException("Invalid access token");
+
+        var userInfoResponse = await idpClient.GetUserInfoAsync(new UserInfoRequest
+        {
+            Address = metaDataResponse.UserInfoEndpoint,
+            Token = token,
+        });
+
+        if (userInfoResponse.IsError)
+            throw new HttpRequestException("Something went wrong while getting user info");
+
+        var userInfoDictionary = new Dictionary<string, string>();
+        foreach (var claim in userInfoResponse.Claims)
+        {
+            userInfoDictionary.Add(claim.Type, claim.Value);
+        }
+        return new UserInfoViewModel(userInfoDictionary);
     }
     #endregion
 

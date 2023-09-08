@@ -46,6 +46,9 @@ public static class Config
             {
                 IdentityServerConstants.StandardScopes.OpenId,
                 IdentityServerConstants.StandardScopes.Profile,
+                IdentityServerConstants.StandardScopes.Address,
+                IdentityServerConstants.StandardScopes.Email,
+                "roles",
                 "movieAPI",
             }
         },
@@ -58,8 +61,11 @@ public static class Config
     public static IEnumerable<IdentityResource> IdentityResources => new IdentityResource[] {
         new IdentityResources.OpenId(),
         new IdentityResources.Profile(),
+        new IdentityResources.Address(),
+        new IdentityResources.Email(),
+        new IdentityResource("roles","Your role(s)",new List<string>{ "role"})
     };
-    public static List<TestUser> TestUsers => new List<TestUser>
+    public static List<TestUser> TestUsers => new()
     {
         new TestUser
         {
