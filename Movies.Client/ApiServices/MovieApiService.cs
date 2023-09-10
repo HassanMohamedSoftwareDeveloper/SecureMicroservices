@@ -29,7 +29,7 @@ public class MovieApiService : IMovieApiService
 
         var httpClient = _httpClientFactory.CreateClient("MovieAPIClient");
 
-        var request = new HttpRequestMessage(HttpMethod.Get, "/api/movies/");
+        var request = new HttpRequestMessage(HttpMethod.Get, "/movies");
         var response = await httpClient
              .SendAsync(request, HttpCompletionOption.ResponseHeadersRead)
              .ConfigureAwait(false);
@@ -45,7 +45,7 @@ public class MovieApiService : IMovieApiService
     {
         var httpClient = _httpClientFactory.CreateClient("MovieAPIClient");
 
-        var request = new HttpRequestMessage(HttpMethod.Get, $"/api/movies/{id}");
+        var request = new HttpRequestMessage(HttpMethod.Get, $"/movies/{id}");
         var response = await httpClient
              .SendAsync(request, HttpCompletionOption.ResponseHeadersRead)
              .ConfigureAwait(false);
@@ -60,7 +60,7 @@ public class MovieApiService : IMovieApiService
     public async Task<Movie> CreateMovieAsync(Movie movie)
     {
         var httpClient = _httpClientFactory.CreateClient("MovieAPIClient");
-        var request = new HttpRequestMessage(HttpMethod.Post, $"/api/movies/")
+        var request = new HttpRequestMessage(HttpMethod.Post, $"/movies")
         {
             Content = new StringContent(JsonConvert.SerializeObject(movie), Encoding.UTF8, "application/json")
         };
@@ -78,7 +78,7 @@ public class MovieApiService : IMovieApiService
     public async Task<Movie> UpdateMovieAsync(Movie movie)
     {
         var httpClient = _httpClientFactory.CreateClient("MovieAPIClient");
-        var request = new HttpRequestMessage(HttpMethod.Put, $"/api/movies/{movie.Id}")
+        var request = new HttpRequestMessage(HttpMethod.Put, $"/movies/{movie.Id}")
         {
             Content = new StringContent(JsonConvert.SerializeObject(movie), Encoding.UTF8, "application/json")
         };
@@ -96,7 +96,7 @@ public class MovieApiService : IMovieApiService
     public async Task DeleteMovieAsync(int id)
     {
         var httpClient = _httpClientFactory.CreateClient("MovieAPIClient");
-        var request = new HttpRequestMessage(HttpMethod.Delete, $"/api/movies/{id}");
+        var request = new HttpRequestMessage(HttpMethod.Delete, $"/movies/{id}");
         var response = await httpClient
              .SendAsync(request, HttpCompletionOption.ResponseHeadersRead)
              .ConfigureAwait(false);

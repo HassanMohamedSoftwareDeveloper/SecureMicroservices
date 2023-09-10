@@ -1,5 +1,6 @@
 ﻿// Ignore Spelling: Api
 
+using IdentityModel;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
@@ -30,7 +31,10 @@ public class MoviesController : Controller
     public async Task<IActionResult> Index()
     {
         await LogTokenAndClaims();
-        return View(await _movieApiService.GetMoviesAsync());
+        var givenName = User.Claims.First(x => x.Type == JwtClaimTypes.GivenName).Value;
+        var allMovies = await _movieApiService.GetMoviesAsync();
+        var preferedMovies = allMovies.Where(x => string.Equals(x.Owner, givenName, StringComparison.OrdinalIgnoreCase)).ToList();
+        return View(preferedMovies);
     }
 
     public async Task<IActionResult> Details(int id)

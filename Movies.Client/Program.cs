@@ -46,7 +46,7 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddTransient<AuthenticationDelegationHandler>();
 builder.Services.AddHttpClient("MovieAPIClient", client =>
 {
-    client.BaseAddress = new Uri("https://localhost:7189/");
+    client.BaseAddress = new Uri("https://localhost:7102/");
     client.DefaultRequestHeaders.Clear();
     client.DefaultRequestHeaders.Add(HeaderNames.Accept, "application/json");
 })
